@@ -1,0 +1,128 @@
+CREATE DATABASE online_retail;
+
+USE online_retail;
+CREATE TABLE Categories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(100)
+);
+CREATE TABLE Customers (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_name VARCHAR(100),
+    email VARCHAR(100),
+    phone VARCHAR(15),
+    city VARCHAR(100)
+);
+CREATE TABLE Products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_name VARCHAR(100),
+    price DECIMAL(10,2),
+    stock INT,
+    category_id INT,
+    FOREIGN KEY (category_id)
+    REFERENCES Categories(category_id)
+);
+CREATE TABLE Orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    order_date DATE,
+    total_amount DECIMAL(10,2),
+    FOREIGN KEY (customer_id)
+    REFERENCES Customers(customer_id)
+);
+CREATE TABLE Payments (
+    payment_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    payment_method VARCHAR(50),
+    payment_status VARCHAR(50),
+    FOREIGN KEY (order_id)
+    REFERENCES Orders(order_id)
+);
+CREATE TABLE Order_Items (
+    order_item_id INT PRIMARY KEY AUTO_INCREMENT,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    subtotal DECIMAL(10,2),
+    FOREIGN KEY (order_id)
+    REFERENCES Orders(order_id),
+    FOREIGN KEY (product_id)
+    REFERENCES Products(product_id)
+);
+SHOW TABLES;
+INSERT INTO Categories(category_name)
+VALUES
+('Electronics'),
+('Fashion'),
+('Books');
+INSERT INTO Customers(customer_name, email, phone, city)
+VALUES
+('Rahul', 'rahul@gmail.com', '9876543210', 'Delhi'),
+('Aman', 'aman@gmail.com', '9999999999', 'Mumbai');
+INSERT INTO Products(product_name, price, stock, category_id)
+VALUES
+('Laptop', 55000, 10, 1),
+('T-Shirt', 1000, 50, 2),
+('Java Book', 500, 30, 3);
+INSERT INTO Orders(customer_id, order_date, total_amount)
+VALUES
+(1, '2025-05-25', 56000),
+(2, '2025-05-26', 1500);
+INSERT INTO Payments(order_id, payment_method, payment_status)
+VALUES
+(1, 'UPI', 'Completed'),
+(2, 'Credit Card', 'Completed');
+INSERT INTO Order_Items(order_id, product_id, quantity, subtotal)
+VALUES
+(1, 1, 1, 55000),
+(1, 3, 2, 1000),
+(2, 2, 1, 1000);
+SELECT * FROM Customers;
+SELECT * FROM Products;
+SELECT c.customer_name,
+       o.order_id,
+       o.total_amount
+FROM Customers c
+JOIN Orders o
+ON c.customer_id = o.customer_id;
+SELECT p.product_name,
+       oi.quantity,
+       oi.subtotal
+FROM Products p
+JOIN Order_Items oi
+ON p.product_id = oi.product_id;
+SELECT o.order_id,
+       p.payment_method,
+       p.payment_status
+FROM Orders o
+JOIN Payments p
+ON o.order_id = p.order_id;
+DELIMITER //
+
+CREATE PROCEDURE AddCustomer(
+    IN c_name VARCHAR(100),
+    IN c_email VARCHAR(100),
+    IN c_phone VARCHAR(15),
+    IN c_city VARCHAR(100)
+)
+BEGIN
+    INSERT INTO Customers(customer_name, email, phone, city)
+    VALUES(c_name, c_email, c_phone, c_city);
+END //
+
+DELIMITER ;
+CALL AddCustomer(
+'Kiran',
+'kiran@gmail.com',
+'8888888888',
+'Hyderabad'
+);
+SELECT SUM(total_amount) AS Total_Sales
+FROM Orders;
+SELECT COUNT(*) AS Total_Customers
+FROM Customers;
+SELECT product_name, price
+FROM Products
+ORDER BY price DESC
+LIMIT 1;
+
+SHOW TABLES;
